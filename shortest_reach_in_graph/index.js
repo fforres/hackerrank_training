@@ -39,6 +39,7 @@ Graph.prototype.handleNodeData = function() {
     const nodeData = this.nodesData.shift().split(' ');
     this.relateNode(parseInt(nodeData[0]), parseInt(nodeData[1]));
   }
+  return this;
 }
 
 Graph.prototype.getOrCreateNode = function(index) {
@@ -114,13 +115,12 @@ function processData(unparsedInput, unparsedOutput) {
     thaGee.setNodesData(inputSubset);
     thaGee.setResults(resultLines);
     thaGee.setStartingPoint(startingPoint);
-    thaGee.handleNodeData();
     arrOfGraphs.push(thaGee);
     console.timeEnd(`graph-${graphs}`);
   }
   arrOfGraphs.forEach((el) => {
     console.time(`graph-${el.index}`);
-    el.BFS().show();
+    el.handleNodeData().BFS().show();
     console.timeEnd(`graph-${el.index}`);
   })
 }
