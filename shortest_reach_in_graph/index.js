@@ -1,6 +1,6 @@
 const cluster = require('cluster');
-const data = require('./dataSmall');
-const result = require('./resultSmall');
+const data = require('./data');
+const result = require('./result');
 function Node(index) {
   this.index = index;
   this.visited = false;
@@ -35,8 +35,7 @@ Graph.prototype.setNodesData = function(nodesData) {
   this.nodesData = nodesData;
 }
 Graph.prototype.handleNodeData = function() {
-  console.log(this);
-  for (var line = 0; line < this.nodesData.length; line++) {
+  while (this.nodesData.length) {
     const nodeData = this.nodesData.shift().split(' ');
     this.relateNode(parseInt(nodeData[0]), parseInt(nodeData[1]));
   }
@@ -75,6 +74,7 @@ Graph.prototype.BFS = function() {
       }
     }
   }
+  return this;
 }
 
 Graph.prototype.show = function() {
@@ -90,35 +90,39 @@ Graph.prototype.show = function() {
     }
   }
   const joinedAnswer = ans.join(' ');
-  console.log(joinedAnswer, ' - ',this.result, ans.join(' '))
+  console.log(joinedAnswer === this.result)
 }
+
 function processData(unparsedInput, unparsedOutput) {
   //Enter your code here
   const input = unparsedInput.split('\n');
   const output = unparsedOutput.split('\n');
   const iterations = parseInt(input.shift());
-  const arrOfDatas = [];
   const arrOfGraphs = [];
   for (let graphs = iterations; graphs > 0; graphs--) {
-    const thaGee = new Graph();
+    console.time(`graph-${graphs}`);
 
+    const thaGee = new Graph();
     const newLine = input.shift().split(' ');
     const numberOfNodes = parseInt(newLine[0]);
     const numberOfLines = parseInt(newLine[1]);
+    const resultLines = output.shift();
+    const inputSubset = input.splice(0, numberOfLines);
+    const startingPoint = parseInt(input.shift());
+    thaGee.index = graphs;
     thaGee.setNumberOfNodes(numberOfNodes);
-    console.log(numberOfLines);
-    thaGee.setNodesData(input.splice(0, numberOfLines));
-    thaGee.setResults(output.shift());
-    thaGee.setStartingPoint(parseInt(input.shift()));
+    thaGee.setNodesData(inputSubset);
+    thaGee.setResults(resultLines);
+    thaGee.setStartingPoint(startingPoint);
     thaGee.handleNodeData();
-    thaGee.BFS();
-    thaGee.show();
     arrOfGraphs.push(thaGee);
+    console.timeEnd(`graph-${graphs}`);
   }
-  // console.log(arrOfGraphs);
-  // console.log(arrOfGraphs);
-  // thaGee.BFS(parseInt(input.shift()))
-  // thaGee.show()
+  arrOfGraphs.forEach((el) => {
+    console.time(`graph-${el.index}`);
+    el.BFS().show();
+    console.timeEnd(`graph-${el.index}`);
+  })
 }
 
 processData(data, result)
