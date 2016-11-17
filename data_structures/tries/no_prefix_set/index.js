@@ -27,6 +27,10 @@ Trie.prototype.handleWord = function(word, parentChar) {
         this.error = word;
         break;
       }
+      if (word.length === i+1) {
+        this.error = word;
+        break;
+      }
       parent = parent.subChars[character];
     } else {
       const char = new Char();
@@ -48,9 +52,7 @@ Trie.prototype.handleWord = function(word, parentChar) {
 }
 
 Trie.prototype.start = function() {
-  console.log(this.data)
   const length = parseInt(this.data.shift());
-
   for (var i = 0; i < length; i++) {
     if (!this.error) {
       this.handleWord(this.data.shift(), this.trie)
