@@ -2,6 +2,7 @@ const data = require('./data').split('\n');
 
 function Median(){
   this.refArr = [];
+  this.sortedArr = [];
   this.biggest = 0;
   this.refOject = {};
 }
@@ -15,6 +16,33 @@ Median.prototype.bubbleUp = function(index) {
     this.bubbleUp(parentIndex);
   }
 }
+Median.prototype.sortDown = function() {
+  let currentIndex = this.refArr.length - 1;
+    this.sortedArr.push(this.refArr[0]);
+    const aux = this.refArr[0];
+    this.refArr[0] = this.refArr[currentIndex];
+    this.refArr[currentIndex] = aux;
+    this.bubbleDown();
+  return this;
+}
+
+Median.prototype.bubbleDown = function() {
+  let index = 0;
+  while ((index*2)+1 < this.refArr.length) {
+    if (this.refArr[(index*2) + 2] > this.refArr[(index*2) + 1]) {
+      const aux = this.refArr[(index*2) + 2];
+      this.refArr[(index*2) + 2] = this.refArr[index];
+      this.refArr[index] = aux;
+      index = (index*2) + 2;
+    } else {
+      const aux = this.refArr[(index*2) + 1];
+      this.refArr[(index*2) + 1] = this.refArr[index];
+      this.refArr[index] = aux;
+      index = (index*2) + 1;
+    }
+  }
+  return this;
+}
 Median.prototype.add = function (el) {
   this.refArr.push(el)
   this.bubbleUp(this.refArr.length - 1);
@@ -22,16 +50,16 @@ Median.prototype.add = function (el) {
 }
 Median.prototype.calculateMedian = function(){
   let calculatedMedian = 0;
-  if (this.refArr.length === 0) {
+  if (this.sortedArr.length === 0) {
     calculatedMedian = 0;
-  } else if (this.refArr.length % 2) {
+  } else if (this.sortedArr.length % 2) {
     // impar
-    const middle = (this.refArr.length + 1) / 2;
-    calculatedMedian = this.refArr[middle]/2;
+    const middle = (this.sortedArr.length + 1) / 2;
+    calculatedMedian = this.sortedArr[middle]/2;
   } else {
     // PAR
-    const middle = this.refArr.length / 2;
-    calculatedMedian = (this.refArr[middle] + this.refArr[middle - 1]) / 2;
+    const middle = this.sortedArr.length / 2;
+    calculatedMedian = (this.sortedArr[middle] + this.sortedArr[middle - 1]) / 2;
   }
   console.log(calculatedMedian);
 }
@@ -39,14 +67,11 @@ Median.prototype.calculateMedian = function(){
 function start(data) {
   const median = new Median();
   for (let i = parseInt(data.shift()); i > 0; i--) {
-    median.add(parseInt(data.shift())).calculateMedian();
+    const toAdd = parseInt(data.shift());
+    console.log(toAdd);
+    median.add(toAdd).sortDown().calculateMedian();
+    console.log("SORTED!!!!", median.sortedArr)
   }
 }
 
 start(data);
-
-// const parent = Math.floor((i-1)/2);
-        //                0
-        //       1                  2
-        //   3       4         5         6
-        // 7   8   9   10   11   12   13   14
