@@ -10,11 +10,3 @@ UPDATE 2 2 2 1
 QUERY 1 1 1 1 1 1
 QUERY 1 1 1 2 2 2
 QUERY 2 2 2 2 2 2`
-
-
-module.exports = `1
-4 4
-UPDATE 1 1 1 1
-QUERY 1 1 1 1 1 1
-QUERY 1 1 1 2 2 2
-QUERY 2 2 2 2 2 2`

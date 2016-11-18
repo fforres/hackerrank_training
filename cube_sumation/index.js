@@ -3,70 +3,74 @@ const result = require('./result');
 
 function Cube (size) {
   this.size = size;
-  this.matrix = new Array(this.size);
   this.computedMatrix = new Array(this.size);
   // console.time(`creating_matrix_of_${this.size}`)
-  for(let x = 0; x < size; x++) {
-    this.matrix[x] = new Array(this.size);
+  for(let x = 0; x <= size; x++) {
     this.computedMatrix[x] = new Array(this.size);
-    for(let y = 0; y < size; y++) {
-      this.matrix[x][y] = new Array(this.size);
+    for(let y = 0; y <= size; y++) {
       this.computedMatrix[x][y] = new Array(this.size);
-      for(let z = 0; z < size; z++) {
-        this.matrix[x][y][z] = 0;
+      for(let z = 0; z <= size; z++) {
         this.computedMatrix[x][y][z] = 0;
       }
     }
   }
-  // console.timeEnd(`creating_matrix_of_${this.size}`)
-}
-Cube.prototype.recalculateY = function(xCoord, yCoord, zCoord) {
-  return this;
-}
-Cube.prototype.recalculateZ = function(xCoord, yCoord, zCoord) {
-  return this;
 }
 
-Cube.prototype.recalculateX = function(xCoord, yCoord, zCoord) {
-  let cummulative = [];
-  console.log(this.matrix)
-  for(let X = 0 ; X < this.size; X++) {
-    cummulative = 0;
-    for(let Y = 0 ; Y < this.size; Y++) {
-      this.computedMatrix[X][Y][0] = cummulative + this.computedMatrix[0][Y][0]
-      cummulative = this.computedMatrix[X][Y][0]
+Cube.prototype.recalculate = function(posX, posY, posZ) {
+  for(let X = posX; X < this.size; X++ ){
+    for(let Y = posY; Y < this.size; Y++ ){
+      for(let Z = posZ; Z < this.size; Z++ ){
+        const toSum = (this.computedMatrix[X][Y][Z-1]? this.computedMatrix[X][Y][Z-1]: 0);
+        this.computedMatrix[X][Y][Z] = this.computedMatrix[X][Y][Z] + toSum;
+      }
     }
   }
-  console.log('----------')
-  console.log(this.computedMatrix)
+  for(let X = posX; X < this.size; X++ ){
+    for(let Y = posY; Y < this.size; Y++ ){
+      for(let Z = posZ; Z < this.size; Z++ ){
+        const toSum = (this.computedMatrix[X][Y-1]? this.computedMatrix[X][Y-1][Z]: 0);
+        this.computedMatrix[X][Y][Z] = this.computedMatrix[X][Y][Z] + toSum;
+      }
+    }
+  }
+  for(let X = posX; X < this.size; X++ ){
+    for(let Y = posY; Y < this.size; Y++ ){
+      for(let Z = posZ; Z < this.size; Z++ ){
+        const toSum = (this.computedMatrix[X-1]? this.computedMatrix[X-1][Y][Z]: 0);
+        this.computedMatrix[X][Y][Z] = this.computedMatrix[X][Y][Z] + toSum;
+      }
+    }
+  }
   return this;
 }
 
-Cube.prototype.update = function (arguments) {
-  const coords = arguments;
-  this.matrix[coords[0]][coords[1]][coords[2]] = parseInt(coords[3]);
-  return this;
+Cube.prototype.update = function (coords) {
+  this.computedMatrix[coords[0]][coords[1]][coords[2]] = parseInt(coords[3]);
+  this.recalculate(coords[0], coords[1], coords[2]);
 }
-Cube.prototype.query = function (arguments) {
-  // let sum = 0;
-  // const coords = arguments
-  // for(let row = parseInt(coords[0]); row <= parseInt(coords[3]); row++ ) {
-  //   for(let col = parseInt(coords[1]); col <= parseInt(coords[4]); col++ ) {
-  //     for(let time = parseInt(coords[2]); time <= parseInt(coords[5]); time++ ) {
-  //       if(!this.data[row]) {
-  //         this.data[row] = [];
-  //       }
-  //       if(!this.data[row][col]) {
-  //         this.data[row][col] = [];
-  //       }
-  //       if(!this.data[row][col][time]) {
-  //         this.data[row][col][time] = 0;
-  //       }
-  //       sum = sum + this.data[row][col][time];
-  //     }
-  //   }
-  // }
-  // this.result.push(sum);
+Cube.prototype.query = function (coords) {
+  console.log('\n');
+  // 000 = 012
+  // 100 = 312
+  // 110 = 342
+  // 010 = 042
+  // 011 = 045
+  // 001 = 015
+  // 101 = 315
+  // 111 = 345
+  const nearCube = this.computedMatrix[coords[3]][coords[4]][coords[2]];
+  const topCube = this.computedMatrix[coords[3]][coords[1]][coords[5]];
+  const farCube = this.computedMatrix[coords[0]][coords[4]][coords[5]];
+
+  const bigCube = this.computedMatrix[coords[3]][coords[4]][coords[5]];
+  const smallCube = this.computedMatrix[coords[0]][coords[0]][coords[0]];
+  console.log(nearCube)
+  console.log(topCube)
+  console.log(farCube)
+  console.log(smallCube)
+  console.log(bigCube)
+  console.log(bigCube - nearCube - topCube - farCube + smallCube )
+  console.log(this.computedMatrix)
 }
 
 
@@ -83,17 +87,8 @@ function processData(input) {
       let actions = data.shift().split(' ');
       const action = actions.shift().toLowerCase();
       actions = actions.map(Number);
-      if (action === 'update' ) {
-        cube.update(actions)
-          .recalculateX(actions[0],actions[1],action[2])
-          .recalculateY()
-          .recalculateZ()
-      } else {
-        cube.query(actions);
-      }
-
+      cube[action](actions);
     }
-    // consolidated = consolidated.concat(cube.result);
     console.timeEnd(`${i}`)
   }
 }
