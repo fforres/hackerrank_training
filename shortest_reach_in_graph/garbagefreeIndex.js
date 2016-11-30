@@ -1,4 +1,3 @@
-const cluster = require('cluster');
 const data = require('./data');
 const result = require('./result');
 function Node(index) {
@@ -16,24 +15,8 @@ Node.prototype.addRelation = function (index, node) {
 function Graph() {
   this.refArray = [];
   this.queue = [];
-  this.result = '';
-  this.startingPoint = 0;
-  this.numberOfNodes = 0;
-  this.nodesData = [];
 }
 
-Graph.prototype.setNumberOfNodes = function(numberOfNodes) {
-  this.numberOfNodes = numberOfNodes;
-}
-Graph.prototype.setResults = function(result) {
-  this.result = result;
-}
-Graph.prototype.setStartingPoint = function(startingPoint) {
-  this.startingPoint = startingPoint;
-}
-Graph.prototype.setNodesData = function(nodesData) {
-  this.nodesData = nodesData;
-}
 Graph.prototype.handleNodeData = function() {
   while (this.nodesData.length) {
     const nodeData = this.nodesData.shift().split(' ');
@@ -55,7 +38,6 @@ Graph.prototype.relateNode = function(from, to) {
   initialNode.addRelation(to, targetNode)
   targetNode.addRelation(from, initialNode)
 }
-
 
 Graph.prototype.BFS = function() {
   let currentLVL = 1;
@@ -101,28 +83,17 @@ function processData(unparsedInput, unparsedOutput) {
   const iterations = parseInt(input.shift());
   const arrOfGraphs = [];
   for (let graphs = iterations; graphs > 0; graphs--) {
-    console.time(`graph-${graphs}`);
-
     const thaGee = new Graph();
     const newLine = input.shift().split(' ');
-    const numberOfNodes = parseInt(newLine[0]);
-    const numberOfLines = parseInt(newLine[1]);
-    const resultLines = output.shift();
-    const inputSubset = input.splice(0, numberOfLines);
-    const startingPoint = parseInt(input.shift());
-    thaGee.index = graphs;
-    thaGee.setNumberOfNodes(numberOfNodes);
-    thaGee.setNodesData(inputSubset);
-    thaGee.setResults(resultLines);
-    thaGee.setStartingPoint(startingPoint);
+    thaGee.numberOfNodes = parseInt(newLine[0]);
+    thaGee.nodesData = input.splice(0, parseInt(newLine[1]));
+    thaGee.result = output.shift();
+    thaGee.startingPoint = parseInt(input.shift());
     arrOfGraphs.push(thaGee);
-    console.timeEnd(`graph-${graphs}`);
   }
-  arrOfGraphs.forEach((el) => {
-    console.time(`graph-${el.index}`);
-    el.handleNodeData().BFS().show();
-    console.timeEnd(`graph-${el.index}`);
-  })
+  while (arrOfGraphs.length) {
+    arrOfGraphs.shift().handleNodeData().BFS().show();
+  }
 }
 
 processData(data, result)
